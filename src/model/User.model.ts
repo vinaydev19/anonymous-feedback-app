@@ -23,46 +23,54 @@ export interface User extends Document {
   password: string;
   verifyCode: string;
   verifyCodeExpiry: Date;
-  isVerified: boolean;
+  isVerify: boolean;
   isAcceptingMessages: boolean;
-  messages: Message[];
+  message: Message[];
 }
 
-const UserSchema: Schema<User> = new mongoose.Schema({
+const UserSchema: Schema<User> = new Schema({
   username: {
     type: String,
-    required: [true, "Username is required"],
+    required: true,
     trim: true,
     unique: true,
   },
   email: {
     type: String,
-    required: [true, "Email is required"],
+    required: true,
     unique: true,
-    match: [/.+\@.+\..+/, "Please use a valid email address"],
+    match: [/.+@.+\..+/, "Please fill a valid email address"],
   },
   password: {
     type: String,
-    required: [true, "Password is required"],
+    required: true,
   },
   verifyCode: {
     type: String,
-    required: [true, "Verify Code is required"],
+    required: true,
   },
   verifyCodeExpiry: {
     type: Date,
-    required: [true, "Verify Code Expiry is required"],
+    required: true,
   },
-  isVerified: {
+  isVerify: {
     type: Boolean,
     default: false,
   },
   isAcceptingMessages: {
     type: Boolean,
+    required: true,
     default: true,
   },
-  messages: [MessageSchema],
+  message: {
+    type: [MessageSchema],
+  },
 });
+
+// In Next.js (or other serverless/hot-reloading environments), the code can run multiple times.
+// Mongoose throws an "OverwriteModelError" if we try to compile the same model more than once.
+// To prevent this, we check if the model is already compiled (exists in mongoose.models).
+// If it exists, we reuse it; otherwise, we compile a new one.
 
 const UserModel =
   (mongoose.models.User as mongoose.Model<User>) ||
